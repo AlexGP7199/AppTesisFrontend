@@ -1,0 +1,97 @@
+<div>
+  <div class="page-header">
+    <h1>Contactos</h1>
+    <button class="btn-primary" (click)="openCreate()">+ Nuevo Contacto</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (items.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Email</th>
+          <th>Teléfono</th>
+          <th>Usuario</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.contactsId) {
+          <tr>
+            <td>{{ item.contactsId }}</td>
+            <td>{{ item.name }}</td>
+            <td>{{ item.type }}</td>
+            <td>{{ item.email }}</td>
+            <td>{{ item.phone }}</td>
+            <td>{{ item.usuarioNombre }}</td>
+            <td>
+              <button class="btn-edit" (click)="openEdit(item)">Editar</button>
+              <button class="btn-delete" (click)="deleteItem(item.contactsId)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (pagedData) {
+      <div class="pagination">
+        <button (click)="prevPage()" [disabled]="!pagedData.hasPreviousPage">Anterior</button>
+        <span>Página {{ pagedData.pageNumber }} de {{ pagedData.totalPages }} ({{ pagedData.totalRecords }} registros)</span>
+        <button (click)="nextPage()" [disabled]="!pagedData.hasNextPage">Siguiente</button>
+      </div>
+    }
+  } @else {
+    <div class="empty-state"><p>No hay contactos registrados</p></div>
+  }
+
+  @if (showModal) {
+    <div class="modal-overlay" (click)="showModal = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2>{{ isEditing ? 'Editar' : 'Nuevo' }} Contacto</h2>
+        @if (errorMessage) {
+          <div class="alert-error">{{ errorMessage }}</div>
+        }
+        <form (ngSubmit)="save()">
+          <div class="form-group">
+            <label for="name">Nombre</label>
+            <input type="text" id="name" [(ngModel)]="formData.name" name="name" required />
+          </div>
+          <div class="form-group">
+            <label for="type">Tipo</label>
+            <select id="type" [(ngModel)]="formData.type" name="type">
+              <option value="Cliente">Cliente</option>
+              <option value="Proveedor">Proveedor</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" [(ngModel)]="formData.email" name="email" />
+          </div>
+          <div class="form-group">
+            <label for="phone">Teléfono</label>
+            <input type="text" id="phone" [(ngModel)]="formData.phone" name="phone" />
+          </div>
+          <div class="form-group">
+            <label for="userId">Usuario</label>
+            <select id="userId" [(ngModel)]="formData.userId" name="userId" required>
+              <option [value]="0" disabled>Seleccione un usuario</option>
+              @for (u of usuarios; track u.userId) {
+                <option [value]="u.userId">{{ u.fullName }}</option>
+              }
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="showModal = false">Cancelar</button>
+            <button type="submit" class="btn-primary">{{ isEditing ? 'Actualizar' : 'Crear' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

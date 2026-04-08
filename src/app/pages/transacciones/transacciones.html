@@ -1,0 +1,123 @@
+<div>
+  <div class="page-header">
+    <h1>Transacciones</h1>
+    <button class="btn-primary" (click)="openCreate()">+ Nueva Transacción</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (items.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Fecha</th>
+          <th>Descripción</th>
+          <th>Monto</th>
+          <th>Tipo</th>
+          <th>Cuenta</th>
+          <th>Categoría</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.transaccionId) {
+          <tr>
+            <td>{{ item.transaccionId }}</td>
+            <td>{{ item.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>{{ item.descripcion }}</td>
+            <td>{{ item.monto | currency:item.moneda }}</td>
+            <td>
+              <span class="badge" [class.badge-ingreso]="item.tipoOperacion === 'Ingreso'" [class.badge-egreso]="item.tipoOperacion === 'Egreso'">
+                {{ item.tipoOperacion }}
+              </span>
+            </td>
+            <td>{{ item.cuentaNombre }}</td>
+            <td>{{ item.categoriaNombre }}</td>
+            <td>
+              <button class="btn-edit" (click)="openEdit(item)">Editar</button>
+              <button class="btn-delete" (click)="deleteItem(item.transaccionId)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (pagedData) {
+      <div class="pagination">
+        <button (click)="prevPage()" [disabled]="!pagedData.hasPreviousPage">Anterior</button>
+        <span>Página {{ pagedData.pageNumber }} de {{ pagedData.totalPages }} ({{ pagedData.totalRecords }} registros)</span>
+        <button (click)="nextPage()" [disabled]="!pagedData.hasNextPage">Siguiente</button>
+      </div>
+    }
+  } @else {
+    <div class="empty-state"><p>No hay transacciones registradas</p></div>
+  }
+
+  @if (showModal) {
+    <div class="modal-overlay" (click)="showModal = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2>{{ isEditing ? 'Editar' : 'Nueva' }} Transacción</h2>
+        @if (errorMessage) {
+          <div class="alert-error">{{ errorMessage }}</div>
+        }
+        <form (ngSubmit)="save()">
+          <div class="form-group">
+            <label for="accountId">Cuenta</label>
+            <select id="accountId" [(ngModel)]="formData.accountId" name="accountId" required>
+              <option [value]="0" disabled>Seleccione una cuenta</option>
+              @for (c of cuentas; track c.accountId) {
+                <option [value]="c.accountId">{{ c.accountName }} ({{ c.currency }})</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="categoryId">Categoría</label>
+            <select id="categoryId" [(ngModel)]="formData.categoryId" name="categoryId" required>
+              <option [value]="0" disabled>Seleccione una categoría</option>
+              @for (cat of categorias; track cat.categoryId) {
+                <option [value]="cat.categoryId">{{ cat.name }} ({{ cat.operationType }})</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="monto">Monto</label>
+            <input type="number" id="monto" [(ngModel)]="formData.monto" name="monto" required step="0.01" min="0" />
+          </div>
+          <div class="form-group">
+            <label for="moneda">Moneda</label>
+            <select id="moneda" [(ngModel)]="formData.moneda" name="moneda">
+              <option value="USD">USD</option>
+              <option value="EUR">EUR</option>
+              <option value="MXN">MXN</option>
+              <option value="COP">COP</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <input type="text" id="descripcion" [(ngModel)]="formData.descripcion" name="descripcion" />
+          </div>
+          <div class="form-group">
+            <label for="fecha">Fecha</label>
+            <input type="datetime-local" id="fecha" [(ngModel)]="formData.fecha" name="fecha" required />
+          </div>
+          <div class="form-group">
+            <label for="contactsId">Contacto (opcional)</label>
+            <select id="contactsId" [(ngModel)]="formData.contactsId" name="contactsId">
+              <option [ngValue]="null">Ninguno</option>
+              @for (ct of contactos; track ct.contactsId) {
+                <option [value]="ct.contactsId">{{ ct.name }}</option>
+              }
+            </select>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="showModal = false">Cancelar</button>
+            <button type="submit" class="btn-primary">{{ isEditing ? 'Actualizar' : 'Crear' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>

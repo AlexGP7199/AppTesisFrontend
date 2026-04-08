@@ -1,0 +1,77 @@
+<div>
+  <div class="page-header">
+    <h1>Usuarios</h1>
+    <button class="btn-primary" (click)="openCreate()">+ Nuevo Usuario</button>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (items.length > 0) {
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nombre Completo</th>
+          <th>Email</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of items; track item.userId) {
+          <tr>
+            <td>{{ item.userId }}</td>
+            <td>{{ item.fullName }}</td>
+            <td>{{ item.email }}</td>
+            <td>
+              <button class="btn-edit" (click)="openEdit(item)">Editar</button>
+              <button class="btn-delete" (click)="deleteItem(item.userId)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (pagedData) {
+      <div class="pagination">
+        <button (click)="prevPage()" [disabled]="!pagedData.hasPreviousPage">Anterior</button>
+        <span>Página {{ pagedData.pageNumber }} de {{ pagedData.totalPages }} ({{ pagedData.totalRecords }} registros)</span>
+        <button (click)="nextPage()" [disabled]="!pagedData.hasNextPage">Siguiente</button>
+      </div>
+    }
+  } @else {
+    <div class="empty-state"><p>No hay usuarios registrados</p></div>
+  }
+
+  @if (showModal) {
+    <div class="modal-overlay" (click)="showModal = false">
+      <div class="modal" (click)="$event.stopPropagation()">
+        <h2>{{ isEditing ? 'Editar' : 'Nuevo' }} Usuario</h2>
+        @if (errorMessage) {
+          <div class="alert-error">{{ errorMessage }}</div>
+        }
+        <form (ngSubmit)="save()">
+          <div class="form-group">
+            <label for="fullName">Nombre Completo</label>
+            <input type="text" id="fullName" [(ngModel)]="formData.fullName" name="fullName" required />
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" [(ngModel)]="formData.email" name="email" required />
+          </div>
+          @if (!isEditing) {
+            <div class="form-group">
+              <label for="password">Contraseña</label>
+              <input type="password" id="password" [(ngModel)]="formData.password" name="password" required />
+            </div>
+          }
+          <div class="modal-actions">
+            <button type="button" class="btn-secondary" (click)="showModal = false">Cancelar</button>
+            <button type="submit" class="btn-primary">{{ isEditing ? 'Actualizar' : 'Crear' }}</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+</div>
