@@ -1,0 +1,90 @@
+<div class="edit-page">
+  <div class="page-header">
+    <div>
+      <h1>Editar Transacción</h1>
+      <p class="page-subtitle">ID en edición: {{ transaccionId }}</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn-secondary" routerLink="/transacciones">Volver al listado</a>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="alert-success">{{ successMessage }}</div>
+  }
+
+  @if (isLoading) {
+    <div class="empty-state"><p>Cargando transacción...</p></div>
+  } @else {
+    <div class="edit-card">
+      <div class="edit-meta">
+        <span class="meta-label">Ruta actual</span>
+        <code>/transacciones/{{ transaccionId }}/editar</code>
+      </div>
+
+      <form (ngSubmit)="save()">
+        <div class="form-group">
+          <label for="transaccionId">ID</label>
+          <input type="number" id="transaccionId" [ngModel]="formData.transaccionId" name="transaccionId" readonly />
+        </div>
+
+        <div class="form-group">
+          <label for="accountId">Cuenta</label>
+          <select id="accountId" [(ngModel)]="formData.accountId" name="accountId" required>
+            @for (cuenta of cuentas; track cuenta.accountId) {
+              <option [value]="cuenta.accountId">{{ cuenta.accountName }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="categoryId">Categoría</label>
+          <select id="categoryId" [(ngModel)]="formData.categoryId" name="categoryId" required>
+            @for (categoria of categorias; track categoria.categoryId) {
+              <option [value]="categoria.categoryId">{{ categoria.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="contactsId">Contacto</label>
+          <select id="contactsId" [(ngModel)]="formData.contactsId" name="contactsId">
+            <option [ngValue]="null">Sin contacto</option>
+            @for (contacto of contactos; track contacto.contactsId) {
+              <option [ngValue]="contacto.contactsId">{{ contacto.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="monto">Monto</label>
+          <input type="number" id="monto" [(ngModel)]="formData.monto" name="monto" required step="0.01" />
+        </div>
+
+        <div class="form-group">
+          <label for="moneda">Moneda</label>
+          <input type="text" id="moneda" [(ngModel)]="formData.moneda" name="moneda" required maxlength="10" />
+        </div>
+
+        <div class="form-group">
+          <label for="descripcion">Descripción</label>
+          <input type="text" id="descripcion" [(ngModel)]="formData.descripcion" name="descripcion" required maxlength="200" />
+        </div>
+
+        <div class="form-group">
+          <label for="fecha">Fecha</label>
+          <input type="datetime-local" id="fecha" [(ngModel)]="formData.fecha" name="fecha" required />
+        </div>
+
+        <div class="page-actions">
+          <button type="button" class="btn-secondary" (click)="goBack()">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="isSaving">{{ isSaving ? 'Guardando...' : 'Actualizar' }}</button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

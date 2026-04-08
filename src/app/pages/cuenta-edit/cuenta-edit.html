@@ -1,0 +1,61 @@
+<div class="edit-page">
+  <div class="page-header">
+    <div>
+      <h1>Editar Cuenta</h1>
+      <p class="page-subtitle">ID en edición: {{ accountId }}</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn-secondary" routerLink="/cuentas">Volver al listado</a>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="alert-success">{{ successMessage }}</div>
+  }
+
+  @if (isLoading) {
+    <div class="empty-state"><p>Cargando cuenta...</p></div>
+  } @else {
+    <div class="edit-card">
+      <div class="edit-meta">
+        <span class="meta-label">Ruta actual</span>
+        <code>/cuentas/{{ accountId }}/editar</code>
+      </div>
+
+      <form (ngSubmit)="save()">
+        <div class="form-group">
+          <label for="accountId">ID</label>
+          <input type="number" id="accountId" [ngModel]="formData.accountId" name="accountId" readonly />
+        </div>
+
+        <div class="form-group">
+          <label for="userId">Usuario</label>
+          <select id="userId" [(ngModel)]="formData.userId" name="userId" required>
+            @for (usuario of usuarios; track usuario.userId) {
+              <option [value]="usuario.userId">{{ usuario.fullName }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="accountName">Nombre de Cuenta</label>
+          <input type="text" id="accountName" [(ngModel)]="formData.accountName" name="accountName" required maxlength="100" />
+        </div>
+
+        <div class="form-group">
+          <label for="currency">Moneda</label>
+          <input type="text" id="currency" [(ngModel)]="formData.currency" name="currency" required maxlength="10" />
+        </div>
+
+        <div class="page-actions">
+          <button type="button" class="btn-secondary" (click)="goBack()">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="isSaving">{{ isSaving ? 'Guardando...' : 'Actualizar' }}</button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

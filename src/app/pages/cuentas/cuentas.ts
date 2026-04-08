@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CuentaService } from '../../services/cuenta';
 import { UsuarioService } from '../../services/usuario';
 import { CuentaDto, CuentaCreateDto, CuentaUpdateDto } from '../../models/cuenta.model';
 import { UsuarioDto } from '../../models/usuario.model';
 import { PagedResponse } from '../../models/base-response.model';
+import { readPaginationFromRoute } from '../../shared/route-pagination';
 
 @Component({
   selector: 'app-cuentas',
@@ -18,18 +20,43 @@ export class Cuentas implements OnInit {
   pagedData: PagedResponse<CuentaDto> | null = null;
   pageNumber = 1;
   pageSize = 10;
+  isDescending = false;
 
   showModal = false;
   isEditing = false;
   formData = { accountId: 0, userId: 0, accountName: '', currency: 'USD' };
   errorMessage = '';
 
-  constructor(private cuentaService: CuentaService, private usuarioService: UsuarioService) {}
+  constructor(
+    private cuentaService: CuentaService,
+    private usuarioService: UsuarioService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
-  ngOnInit(): void { this.loadData(); this.loadUsuarios(); }
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const pagination = readPaginationFromRoute(params, {
+        pageNumber: 1,
+        pageSize: 10,
+        isDescending: false,
+      });
+
+      this.pageNumber = pagination.pageNumber;
+      this.pageSize = pagination.pageSize;
+      this.isDescending = pagination.isDescending;
+      this.loadData();
+    });
+
+    this.loadUsuarios();
+  }
 
   loadData(): void {
-    this.cuentaService.getPaginated({ pageNumber: this.pageNumber, pageSize: this.pageSize }).subscribe({
+    this.cuentaService.getPaginated({
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      isDescending: this.isDescending,
+    }).subscribe({
       next: (res) => { if (res.isSuccess) { this.pagedData = res.data; this.items = res.data.items; } },
       error: () => this.errorMessage = 'Error al cargar cuentas'
     });
@@ -49,10 +76,7 @@ export class Cuentas implements OnInit {
   }
 
   openEdit(item: CuentaDto): void {
-    this.isEditing = true;
-    this.formData = { accountId: item.accountId, userId: item.userId, accountName: item.accountName, currency: item.currency };
-    this.errorMessage = '';
-    this.showModal = true;
+    this.router.navigate(['/cuentas', item.accountId, 'editar']);
   }
 
   save(): void {

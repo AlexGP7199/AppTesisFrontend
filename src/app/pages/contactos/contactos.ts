@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ContactService } from '../../services/contact';
 import { UsuarioService } from '../../services/usuario';
 import { ContactDto, ContactCreateDto, ContactUpdateDto } from '../../models/contact.model';
 import { UsuarioDto } from '../../models/usuario.model';
 import { PagedResponse } from '../../models/base-response.model';
+import { readPaginationFromRoute } from '../../shared/route-pagination';
 
 @Component({
   selector: 'app-contactos',
@@ -18,18 +20,43 @@ export class Contactos implements OnInit {
   pagedData: PagedResponse<ContactDto> | null = null;
   pageNumber = 1;
   pageSize = 10;
+  isDescending = false;
 
   showModal = false;
   isEditing = false;
   formData = { contactsId: 0, userId: 0, name: '', type: 'Cliente', email: '', phone: '' };
   errorMessage = '';
 
-  constructor(private contactService: ContactService, private usuarioService: UsuarioService) {}
+  constructor(
+    private contactService: ContactService,
+    private usuarioService: UsuarioService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
-  ngOnInit(): void { this.loadData(); this.loadUsuarios(); }
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe((params) => {
+      const pagination = readPaginationFromRoute(params, {
+        pageNumber: 1,
+        pageSize: 10,
+        isDescending: false,
+      });
+
+      this.pageNumber = pagination.pageNumber;
+      this.pageSize = pagination.pageSize;
+      this.isDescending = pagination.isDescending;
+      this.loadData();
+    });
+
+    this.loadUsuarios();
+  }
 
   loadData(): void {
-    this.contactService.getPaginated({ pageNumber: this.pageNumber, pageSize: this.pageSize }).subscribe({
+    this.contactService.getPaginated({
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      isDescending: this.isDescending,
+    }).subscribe({
       next: (res) => { if (res.isSuccess) { this.pagedData = res.data; this.items = res.data.items; } },
       error: () => this.errorMessage = 'Error al cargar contactos'
     });
@@ -49,10 +76,7 @@ export class Contactos implements OnInit {
   }
 
   openEdit(item: ContactDto): void {
-    this.isEditing = true;
-    this.formData = { ...item };
-    this.errorMessage = '';
-    this.showModal = true;
+    this.router.navigate(['/contactos', item.contactsId, 'editar']);
   }
 
   save(): void {

@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CategoriaService } from '../../services/categoria';
 import { CategoriaDto, CategoriaCreateDto, CategoriaUpdateDto } from '../../models/categoria.model';
 import { PagedResponse } from '../../models/base-response.model';
+import { readPaginationFromRoute } from '../../shared/route-pagination';
 
 @Component({
   selector: 'app-categorias',
@@ -15,20 +17,40 @@ export class Categorias implements OnInit {
   pagedData: PagedResponse<CategoriaDto> | null = null;
   pageNumber = 1;
   pageSize = 10;
+  isDescending = false;
 
   showModal = false;
   isEditing = false;
   formData = { categoryId: 0, name: '', operationType: 'Egreso' };
   errorMessage = '';
 
-  constructor(private categoriaService: CategoriaService) {}
+  constructor(
+    private categoriaService: CategoriaService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.loadData();
+    this.route.queryParamMap.subscribe((params) => {
+      const pagination = readPaginationFromRoute(params, {
+        pageNumber: 1,
+        pageSize: 10,
+        isDescending: false,
+      });
+
+      this.pageNumber = pagination.pageNumber;
+      this.pageSize = pagination.pageSize;
+      this.isDescending = pagination.isDescending;
+      this.loadData();
+    });
   }
 
   loadData(): void {
-    this.categoriaService.getPaginated({ pageNumber: this.pageNumber, pageSize: this.pageSize }).subscribe({
+    this.categoriaService.getPaginated({
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      isDescending: this.isDescending,
+    }).subscribe({
       next: (res) => {
         if (res.isSuccess) {
           this.pagedData = res.data;
@@ -47,10 +69,7 @@ export class Categorias implements OnInit {
   }
 
   openEdit(item: CategoriaDto): void {
-    this.isEditing = true;
-    this.formData = { ...item };
-    this.errorMessage = '';
-    this.showModal = true;
+    this.router.navigate(['/categorias', item.categoryId, 'editar']);
   }
 
   save(): void {

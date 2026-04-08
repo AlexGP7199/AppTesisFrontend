@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CurrencyPipe, DatePipe } from '@angular/common';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TransaccionService } from '../../services/transaccion';
 import { CuentaService } from '../../services/cuenta';
 import { CategoriaService } from '../../services/categoria';
@@ -10,6 +11,7 @@ import { CuentaDto } from '../../models/cuenta.model';
 import { CategoriaDto } from '../../models/categoria.model';
 import { ContactDto } from '../../models/contact.model';
 import { PagedResponse } from '../../models/base-response.model';
+import { readPaginationFromRoute } from '../../shared/route-pagination';
 
 @Component({
   selector: 'app-transacciones',
@@ -25,6 +27,7 @@ export class Transacciones implements OnInit {
   pagedData: PagedResponse<TransaccionDto> | null = null;
   pageNumber = 1;
   pageSize = 10;
+  isDescending = false;
 
   showModal = false;
   isEditing = false;
@@ -35,16 +38,34 @@ export class Transacciones implements OnInit {
     private transaccionService: TransaccionService,
     private cuentaService: CuentaService,
     private categoriaService: CategoriaService,
-    private contactService: ContactService
+    private contactService: ContactService,
+    private route: ActivatedRoute,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.loadData();
+    this.route.queryParamMap.subscribe((params) => {
+      const pagination = readPaginationFromRoute(params, {
+        pageNumber: 1,
+        pageSize: 10,
+        isDescending: false,
+      });
+
+      this.pageNumber = pagination.pageNumber;
+      this.pageSize = pagination.pageSize;
+      this.isDescending = pagination.isDescending;
+      this.loadData();
+    });
+
     this.loadRelatedData();
   }
 
   loadData(): void {
-    this.transaccionService.getPaginated({ pageNumber: this.pageNumber, pageSize: this.pageSize }).subscribe({
+    this.transaccionService.getPaginated({
+      pageNumber: this.pageNumber,
+      pageSize: this.pageSize,
+      isDescending: this.isDescending,
+    }).subscribe({
       next: (res) => { if (res.isSuccess) { this.pagedData = res.data; this.items = res.data.items; } },
       error: () => this.errorMessage = 'Error al cargar transacciones'
     });
@@ -70,19 +91,7 @@ export class Transacciones implements OnInit {
   }
 
   openEdit(item: TransaccionDto): void {
-    this.isEditing = true;
-    this.formData = {
-      transaccionId: item.transaccionId,
-      accountId: item.accountId,
-      categoryId: item.categoryId,
-      contactsId: item.contactsId,
-      monto: item.monto,
-      moneda: item.moneda,
-      descripcion: item.descripcion,
-      fecha: item.fecha ? item.fecha.slice(0, 16) : ''
-    };
-    this.errorMessage = '';
-    this.showModal = true;
+    this.router.navigate(['/transacciones', item.transaccionId, 'editar']);
   }
 
   save(): void {

@@ -1,0 +1,59 @@
+<div class="edit-page">
+  <div class="page-header">
+    <div>
+      <h1>Editar Categoría</h1>
+      <p class="page-subtitle">ID en edición: {{ categoryId }}</p>
+    </div>
+    <div class="page-actions">
+      <a class="btn-secondary" routerLink="/categorias">Volver al listado</a>
+    </div>
+  </div>
+
+  @if (errorMessage) {
+    <div class="alert-error">{{ errorMessage }}</div>
+  }
+
+  @if (successMessage) {
+    <div class="alert-success">{{ successMessage }}</div>
+  }
+
+  @if (isLoading) {
+    <div class="empty-state">
+      <p>Cargando categoría...</p>
+    </div>
+  } @else {
+    <div class="edit-card">
+      <div class="edit-meta">
+        <span class="meta-label">Ruta actual</span>
+        <code>/categorias/{{ categoryId }}/editar</code>
+      </div>
+
+      <form (ngSubmit)="save()">
+        <div class="form-group">
+          <label for="categoryId">ID</label>
+          <input type="number" id="categoryId" [ngModel]="formData.categoryId" name="categoryId" readonly />
+        </div>
+
+        <div class="form-group">
+          <label for="name">Nombre</label>
+          <input type="text" id="name" [(ngModel)]="formData.name" name="name" required maxlength="50" />
+        </div>
+
+        <div class="form-group">
+          <label for="operationType">Tipo de Operación</label>
+          <select id="operationType" [(ngModel)]="formData.operationType" name="operationType">
+            <option value="Ingreso">Ingreso</option>
+            <option value="Egreso">Egreso</option>
+          </select>
+        </div>
+
+        <div class="page-actions">
+          <button type="button" class="btn-secondary" (click)="goBack()">Cancelar</button>
+          <button type="submit" class="btn-primary" [disabled]="isSaving">
+            {{ isSaving ? 'Guardando...' : 'Actualizar' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

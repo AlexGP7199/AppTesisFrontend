@@ -1,0 +1,37 @@
+.edit-page {
+  max-width: 720px;
+}
+
+.page-subtitle {
+  margin-top: 6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.page-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.edit-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.edit-meta {
+  margin-bottom: 20px;
+  padding: 12px 14px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.meta-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+}
